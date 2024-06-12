@@ -1,5 +1,7 @@
 # Chrono-OS
 A fun CLI I'm making
+
+currently **version 0.3.3**
 # Stuff for you! the user! hi!!!
 I DID IT!
 
