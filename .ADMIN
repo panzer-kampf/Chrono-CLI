@@ -1,0 +1,30 @@
+#!/bin/bash
+sleep 0.5
+clear
+echo -e '\033[5mADMIN_CONTROL\033[0m'
+function ADMIN () {
+	pwd
+	echo "-------------"
+	read cmdinput
+	if [ $cmdinput == clear ] 2>/dev/null; then
+		clear
+		echo -e '\033[5mADMIN_CONTROL\033[0m'
+	else if [ $cmdinput == TheGrid ] 2>/dev/null; then
+		cd ~/ChronoOS
+		./.Grid
+		wait $!
+		echo -e '\033[5mADMIN_CONTROL\033[0m'
+	else if [ $cmdinput == exit ]; then
+		cd ~/ChronoOS/HOME
+		sleep 0.2
+		clear
+		exit
+	else
+		$cmdinput
+	  fi
+	 fi
+	fi
+	wait $!
+	ADMIN
+}
+ADMIN

@@ -1,0 +1,27 @@
+#!/bin/bash
+clear
+sleep 13
+echo "The Grid."
+sleep 3
+echo "A digital frontier."
+sleep 4
+echo "I tried to picture clusters of information"
+echo "as they moved through the computer."
+sleep 5.5
+echo "What did they look like?"
+sleep 3
+echo "Ships? Motorcycles?"
+sleep 2.5
+echo "Were the circuits like freeways?"
+sleep 3.5
+echo "I kept dreaming of a world"
+echo "I thought I'd never see."
+sleep 5
+echo "And then,"
+sleep 2
+echo "one day."
+sleep 3.5
+echo "I got in."
+echo -e '\033[5mEND_OF_LINE\033[0m'
+sleep 179.4
+exit

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+function login () {
+ echo "Enter users password"
+ read pass
+ if [[ $pass == $(cat .USRPASS) ]]; then
+	exit
+ else if [ $pass == cancel ]; then
+	exit
+	cd ~/ChronoOS/HOME
+ else
+	echo "INVALID"
+	login
+  fi
+ fi
+}
+login

@@ -1,0 +1,23 @@
+----
+list
+cd
+cmds
+pwd
+exit
+clear
+edit
+ADMIN
+makedir
+run
+remove
+makeEXE
+makefile
+DRIVESELECT [/// NO USE \\\]
+printDrives [/// NO USE \\\]
+home
+ListUsers
+newUser
+read
+changeUser
+whoami
+-----

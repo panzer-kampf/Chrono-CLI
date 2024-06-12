@@ -1,0 +1,89 @@
+#!/bin/bash
+
+echo "peak-a-boo!"
+sleep 1
+clear
+cat ~/ChronoOSPRT/NAME
+
+if (test -f ~/ChronoOSPRT/BOOTFAIL); then
+	rm BOOTFAIL
+	echo "removing previous Boot Fail flag"
+else
+	echo "No Boot Fail flag found"
+fi
+echo "loading"
+sleep 1
+echo "Checking disk"
+if (test -e ~/ChronoOSPRT/DRIVES); then
+	ls ~/ChronoOSPRT/DRIVES
+	echo "DONE"
+else
+	echo "ERROR IN DRIVE LOADING {ERROR CODE 2}"
+fi
+sleep 0.5
+
+if (test -f ~/ChronoOSPRT/.ADMIN); then
+	echo "ADMIN User Found"
+else
+	cd ~/ChronoOSPRT
+	echo "ERROR IN LOADING ADMIN USER {ERROR CODE 3}"
+	touch BOOTFAIL
+	exit 
+fi
+if (test -d ~/ChronoOSPRT/HOME/USERS); then
+	echo "USER DIR LOADED"
+else
+	echo "ERROR IN LOADING USERS {ERROR CODE 4}"
+	cd ~/ChronoOSPRT
+	touch BOOTFAIL
+	exit
+fi
+if (test -f ~/ChronoOSPRT/HOME/USRFLAG); then
+	echo "USR FLAG FOUND"
+else
+	echo "USR FLAG NOT FOUND {ERROR CODE 5}"
+	cd ~/ChronoOSPRT
+	touch BOOTFAIL
+	exit
+fi
+cd ~/ChronoOSPRT
+DIR_TO_CHECK=~/ChronoOSPRT/HOME/USERS
+if [ -n "$(find "$DIR_TO_CHECK" -maxdepth 0 -type d -empty 2>/dev/null)" ]; then
+    echo "NO USERS FOUND"
+    echo "Enter Username"
+    read username
+    cd ~/ChronoOSPRT/HOME/USERS
+    mkdir $username
+    cd ~/ChronoOSPRT/HOME/USERS/$username
+    cp ~/ChronoOSPRT/.LOGINPROMPT .LOGINPROPMT
+    touch .USRPASS
+    echo "Enter Password"
+    read pass
+    echo $pass >> .USRPASS
+    echo "USER SET UP, RESTARTING"
+    cd ~/ChronoOSPRT
+    ./BOOTSCREN
+    exit
+else
+    echo "USERS FOUND"
+fi
+if ( test -f ~/ChronoOSPRT/HOME/LOGINRCRD ); then
+	echo "LOGIN RECORD FOUND"
+else
+	echo "NO LOGIN RECORD FOUND"
+	echo "MAKING RECORD"
+	cd ~/ChronoOSPRT/HOME
+	touch LOGINRCRD
+	echo "DONE"
+fi
+sleep 1
+clear
+
+
+while IFS= read -r line
+    do
+        echo "$line"
+	sleep 0.02
+    done < CAUTIONREADME
+sleep 4
+clear

@@ -1,0 +1,322 @@
+#!/bin/bash
+
+HomeDir=~/ChronoOSPRT
+BLACKLIST=("DRIVES" ".VIZ" ".ADMIN" "USERS")
+SPECIAL_BLACKLIST=("DRIVES" ".VIZ" "USERS")
+touch PID
+pid= pidof .VIZ
+echo $pid >> PID
+./BOOTSCREN
+wait $!
+rm PID
+
+cd $HomeDir/HOME
+
+
+if (test -f $HomeDir/BOOTFAIL); then
+	echo "BOOT FAILED"
+	exit
+fi
+cd $HomeDir/HOME
+function RUNPROGRAMS () {
+        echo "What File do you want to run?"
+        read   PROGRAMRUN
+	if [[ ${BLACKLIST[*]} == $PROGRAMRUN ]]; then
+        	echo "Permission Denied"
+	else
+		sudo ./$PROGRAMRUN
+	fi
+}
+
+function LOGIN () {
+	cd $HomeDir
+
+	pass=$(systemd-ask-password)
+	if [ "$pass" == "default" ]; then
+		clear
+		echo "Logging In"
+		play -q start-computeraif-14572.mp3 2> /dev/null &
+		echo "Done!"
+		sleep 1
+		clear
+		echo "Last Login On"
+		tail -n 1 LOGINRCRD
+		date >> LOGINRCRD
+		cd $HomeDir/HOME
+		echo "type 'cmds' to get a list of commands"
+		echo "this message will be removed on clear"
+		CMDPROMPT
+	else if [ "$pass" == cancel ]; then
+			exit
+	else 
+		echo "WRONG PASSWORD"
+	 	sleep 1
+		clear
+		LOGIN
+	 fi
+	fi
+}
+
+
+
+function COPY () {
+
+	echo "what file do you want to copy?"
+	read  COPYFILE
+	echo "enter path to copy file to"
+	read   COPYDEST
+	echo "extra options"
+	read   OPTIONS
+	cp $OPTIONS $COPYFILE $COPYDEST
+	if [ $? == 0 ]; then
+		echo "Copy Done"
+	else
+		echo "FAILED {ERROR CODE 1}"
+	fi
+}
+
+function DRIVEFUNC () {
+	cd $HomeDir
+	sleep 6
+	echo "Chose drive"
+	ls $HomeDir/DRIVES
+	read   driveselect
+	if [ $driveselect == ADRIVE ]; then
+		echo "ADRIVE selected"
+		cd $HomeDir/DRIVES/ADRIVE
+	else if [ $driveselect == BDRIVE ]; then
+		echo "BDRIVE selected"
+		cd $HomeDir/DRIVES/BDRIVE
+	else if [ $driveselect == CDRIVE ]; then
+		echo "CDRIVE selected"
+		cd $HomeDir/DRIVES/CDRIVE
+	else
+		echo "INVALID DRIVE"
+
+  fi
+ fi
+fi
+
+}
+
+function ADMINMODE () {
+
+
+	pass=$(systemd-ask-password)
+	if [ "$pass" == "default" ]; then
+	 echo "GRANTED, ENABLING ADMIN"
+	 cd $HomeDir
+	 ./.ADMIN
+	 cd $HomeDir/HOME
+	else if [ $pass == cancel ]; then
+		CMDPROMPT
+	else
+		echo "WRONG PASSWORD"
+		ADMINMODE
+	 fi
+	fi
+}
+
+function SecureExit () {
+
+	SEP=$(systemd-ask-password)
+	if [ $SEP == "123456" ]; then
+		echo "Exiting"
+		sleep 1
+		clear
+		exit
+	else if [ $SEP == "cancel" ]; then
+		clear
+		CMDPROMPT
+	else
+		echo "INVALID PASSOWRD"
+		sleep 1
+		clear
+		SecureExit
+	 fi
+	fi
+
+}
+
+function USRDEL () {
+
+	echo "Enter Username"
+	read Username
+	echo "Are you sure? [y/n]"
+	read answer
+	if [ $answer == y or $answer == yes ]; then
+		echo "Enter User password"
+		read UserPassword
+		cd $HomeDir/HOME/USERS/$Username
+		if [[ $UserPassword == $(cat .USRPASS) ]]; then
+			cd $HomeDir/HOME/USERS
+			rm -r $Username
+			echo "User Removed"
+		else 
+			echo "Wrong Password"
+		fi
+	else
+		echo "Canceled"
+	fi
+
+}
+
+
+function CMDPROMPT ()  {
+	echo -n ":"
+	read   USERCMD
+	if [ $USERCMD == list ]; then
+		ls 
+	 else if [ $USERCMD == exit ]; then
+		SecureExit
+	else if [ $USERCMD == clear ]; then
+		clear
+	else if [ $USERCMD == cd ]; then
+		echo "Insert Directory:"
+		read  CDINPUT
+		if [ $CDINPUT == USERS ]||[ $CDINPUT == DRIVES ]; then
+			echo "Permission Denied"
+		else
+			cd $CDINPUT
+		fi
+	else if [ $USERCMD == cmds ]; then
+		cat $HomeDir/CMDS
+	else if [ $USERCMD == run ]; then
+		RUNPROGRAMS
+	else if [ $USERCMD == ADMIN ]; then
+		ADMINMODE
+	else if [ $USERCMD == makedir ]; then
+		echo "Enter name below"
+		read NAME
+		mkdir $NAME
+		cd $NAME
+		echo "Directory created, Changed Current Directory to new"
+	else if [ $USERCMD == edit ]; then
+		echo "What file do you want to edit?"
+		read INPUT
+		nano $INPUT
+	else if [ $USERCMD == remove ]; then
+		echo "what file do you want to remove?"
+		read input
+		echo "are you sure? if this file is a directory all files in it will also be deleted!"
+		read YESNO
+		if [ $YESNO = yes ]; then
+		rm -r $input
+		echo "File removed"
+		else
+		echo "aborted"
+		fi
+	else if [ $USERCMD == makefile ]; then
+		echo "enter file name. remember if you are making an executable put .sh at the end"
+		read filename
+		sleep 6
+		touch $filename
+	else if [ $USERCMD == makeEXE ]; then
+		echo "what file do you want to make executable?"
+		read input
+		chmod +x "$input"
+	else if [ $USERCMD == printDrives ]; then
+		ls $HomeDir/DRIVES
+	else if [ $USERCMD == DRIVESELECT ]; then
+		echo "loading"
+		DRIVEFUNC
+	else if [ $USERCMD == copy ]; then
+		COPY
+	else if [ $USERCMD == newUser ]; then
+		cd $HomeDir/HOME/USERS
+		echo "enter name of new user"
+		read username
+		echo "enter user Password"
+		read userdefpass
+		echo "new user made, to remove user cd into USERS and run 'remove' then enter the users name"
+		mkdir $username
+		cd $username
+		cp $HomeDir/.LOGINPROMPT .LOGINPROMPT
+		chmod u+x .LOGINPROMPT
+		touch .USRPASS
+		echo $userdefpass > .USRPASS
+	else if [ $USERCMD == home ]; then
+		cd $HomeDir/HOME
+		userswitch=""
+	else if [ $USERCMD == ListUsers ]; then
+		ls $HomeDir/HOME/USERS
+	else if [ $USERCMD == read ]; then
+		echo "what file do you want to read?"
+		read input
+		if [ $input == cancel ]; then
+			CMDPROMPT
+		else
+			cat $input
+		fi
+	else if [ $USERCMD == changeUser ]; then
+		echo "Enter user to switch to"
+		read userswitch
+		cd $HomeDir/HOME/USERS/$userswitch
+		./.LOGINPROMPT
+	else if [ $USERCMD == whoami ]; then
+			echo $userswitch
+	else if [ $USERCMD == system ]; then
+		./.SYSTEM1
+	else if [ $USERCMD == RESTART ]; then
+		cd $HomeDir
+		clear
+		echo  "RESTARTING"
+		sleep 2
+		./.VIZ
+		exit
+	else if [ $USERCMD == LoginRecord ]; then
+		cd $HomeDir
+		head LOGINRCRD
+	else if [ $USERCMD == pwd ]; then
+		pwd
+	else if [ $USERCMD == ClearLoginRecord ]; then
+		cd $HomeDir
+		echo "Clearing Login Recrord"
+		rm LOGINRCRD
+		wait $!
+		touch LOGINRCRD
+		echo "Login Record Cleared By User" > LOGINRCRD
+	else if [ $USERCMD == RemoveUser ]; then
+		USRDEL
+	else if [ $USERCMD == salsa ]; then
+		echo "salsa!! yay"
+	else
+		echo "INVALID"
+	
+# its the fi section
+                                   fi
+				  fi
+				 fi
+				fi
+			       fi
+			      fi
+			     fi
+			    fi
+			   fi
+			  fi
+			 fi
+			fi
+		       fi
+		      fi
+		     fi
+		    fi
+		   fi
+		  fi
+		 fi
+		fi
+	       fi
+	      fi
+	     fi
+	    fi
+	   fi
+	  fi
+	 fi
+	fi
+#oh. its ended!
+	CMDPROMPT
+ }
+
+LOGIN
+
+#VERSION 0.3.3 INDEV
+#ADDED SYSTEMD PASSWORD
